@@ -1,0 +1,3 @@
+<launch> 
+    <node name="formula_accessor" pkg="formula_accessor" type="formula_accessor.py" output="screen" />
+</launch>
