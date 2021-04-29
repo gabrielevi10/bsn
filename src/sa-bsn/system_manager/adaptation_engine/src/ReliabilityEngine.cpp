@@ -86,7 +86,7 @@ void ReliabilityEngine::monitor() {
     for (std::map<std::string,double>::iterator it = strategy.begin(); it != strategy.end(); ++it){
         if(it->first.find("CTX_") != std::string::npos)  it->second = 0;
         if(it->first.find("R_") != std::string::npos)  it->second = 1;
-        if(it->first.find("F_") != std::string::npos)  it->second = 1;
+        //if(it->first.find("F_") != std::string::npos)  it->second = 1;
     }
 
     archlib::DataAccessRequest r_srv;
@@ -100,7 +100,7 @@ void ReliabilityEngine::monitor() {
     
     //expecting smth like: "/g3t1_1:success,fail,success;/g4t1:success; ..."
     std::string ans = r_srv.response.content;
-    // std::cout << "received=> [" << ans << "]" << std::endl;
+    std::cout << "received=> [" << ans << "]" << std::endl;
     if(ans == ""){
         ROS_ERROR("Received empty answer when asked for reliability.");
     }
@@ -119,8 +119,10 @@ void ReliabilityEngine::monitor() {
 
         std::vector<std::string> values = bsn::utils::split(second, ',');
 
-        strategy["R_" + first] = stod(values[values.size()-1]);
-        std::cout << "R_" + first + " = " << strategy["R_" + first] << std::endl;
+        if (deactivatedComponents[first] == 0) {
+            strategy["R_" + first] = stod(values[values.size()-1]);
+            std::cout << "R_" + first + " = " << strategy["R_" + first] << std::endl;
+        }
     } 
 
     //request context status for all tasks
@@ -162,15 +164,16 @@ void ReliabilityEngine::monitor() {
                 std::stringstream ss;
                 ss << "reliability;" + ID + ";" + first;
                 msg.data = ss.str();
-                if (value == "deactivate") {
+                if (value == "deactivate" && deactivatedComponents[first] == 0) {
                     // strategy["R_" + first] = 1;
                     remove_pub.publish(msg);
-                    // deactivatedComponents["R_" + first] = 1;
+                    deactivatedComponents[first] = 1;
                     force_update();
                     std::cout << first + " was deactivated" << std::endl;
-                } else {
+                } else if (value == "activate" && deactivatedComponents[first] == 1) {
                     add_pub.publish(msg);
                     force_update();
+                    deactivatedComponents[first] = 2;
                     std::cout << first + " was activated" << std::endl;
                 }
             } else {
@@ -199,7 +202,7 @@ void ReliabilityEngine::analyze() {
     double r_curr;
     double error;
 
-    r_curr = calculate_qos(target_system_model,strategy);
+    r_curr = calculate_qos(target_system_model, strategy);
 
     error = setpoint - r_curr;
     // if the error is out of the stability margin, plan!
@@ -227,8 +230,8 @@ void ReliabilityEngine::plan() {
         if(it->first.find("R_") != std::string::npos) {
             std::string task = it->first;
             task.erase(0,2);
-            if((strategy["CTX_"+task] != 0) && (strategy["F_"+task] != 0)){ // avoid ctx = 0 components thus infinite loops
-                if(!deactivatedComponents[it->first]) {
+            if((strategy["CTX_"+task] != 0)){ // avoid ctx = 0 components thus infinite loops
+                if (deactivatedComponents[it->first] == 0) {
                     r_vec.push_back(it->first);
                     strategy[it->first] = r_curr;
                 } else {
@@ -244,7 +247,7 @@ void ReliabilityEngine::plan() {
     std::set<std::pair<std::string,int>, comp> set(priority.begin(), priority.end());
 
     for (auto const &pair : set) {
-        if (!deactivatedComponents[pair.first] && std::find(aux.begin(), aux.end(), pair.first) != aux.end()) { // key from priority exists in r_vec
+        if (deactivatedComponents[pair.first] == 0 && std::find(aux.begin(), aux.end(), pair.first) != aux.end()) { // key from priority exists in r_vec
             r_vec.push_back(pair.first);
         }
     }
@@ -270,7 +273,7 @@ void ReliabilityEngine::plan() {
                 strategy[*it] = (r_curr*(1+offset)>1)?1:r_curr*(1+offset);
             }
         }
-        double r_new = calculate_qos(target_system_model,strategy);
+        double r_new = calculate_qos(target_system_model, strategy);
         std::cout << "offset=" << r_new << std::endl;
 
         std::map<std::string,double> prev;

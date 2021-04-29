@@ -67,8 +67,17 @@ void Engine::setUp_formula(std::string formula_str) {
     // Extracts the terms that will compose the strategy
     std::vector<std::string> terms = target_system_model.getTerms();
     strategy = initialize_strategy(terms);
+
+    for (auto x : terms) {
+        if (x.find("R_") != std::string::npos) {
+            std::string aux = x.substr(2);
+            std::cout << "ME AJUDAAAAA " << aux << '\n';
+            deactivatedComponents[aux] = 0;
+        }
+    }
+
     // Initializes the target system model
-    calculate_qos(target_system_model,strategy);
+    calculate_qos(target_system_model, strategy);
     priority = initialize_priority(terms);
 
     return;

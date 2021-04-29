@@ -27,7 +27,7 @@ def update():
 def setup():
     global formula_tree
     rospy.init_node('formula_accessor', anonymous=True)
-    formula_tree = make_get_request('reliability', 'BSN_1619661787700', 'G1')
+    formula_tree = make_get_request('reliability', 'BSN_1619663524335', 'G1')
     update()
     pub.publish(formula_tree['formula'])
     
@@ -50,7 +50,7 @@ def get_task(goal):
 
 # GET
 def make_get_request(reliCost, id, goal):
-    response = requests.get('http://pistargodatcc.herokuapp.com/formula/' + reliCost + '?id=' + id + '&goal=' + goal)
+    response = requests.get('http://pistargodatcc.herokuapp.com/formula/' + reliCost + '?id=BSN_1619663524335&goal=' + goal)
     formula_tree = response.json()
     rospy.loginfo('Got the formula tree')
     return formula_tree
@@ -76,7 +76,7 @@ def remove_task(data):
     reliCost, id, goal = str(data).split(';')
     task = get_task(goal)
     g3t1['subNodes'].remove(task)
-    response = requests.put('http://pistargodatcc.herokuapp.com/formula/' + reliCost + '?id=' + id + '&goal=G3_T1&shouldPersist=false', json=g3t1)
+    response = requests.put('http://pistargodatcc.herokuapp.com/formula/' + reliCost + '?id=BSN_1619663524335&goal=G3_T1&shouldPersist=false', json=g3t1)
     formula_tree = response.json()
     rospy.loginfo('Edited the formula tree')
     return formula_tree 
@@ -86,7 +86,7 @@ def add_task(data):
     reliCost, id, goal = str(data).split(';')
     task = get_task(goal)
     g3t1['subNodes'].append(task)
-    response = requests.put('http://pistargodatcc.herokuapp.com/formula/' + reliCost + '?id=' + id + '&goal=G3_T1&shouldPersist=false', json=g3t1)
+    response = requests.put('http://pistargodatcc.herokuapp.com/formula/' + reliCost + '?id=BSN_1619663524335&goal=G3_T1&shouldPersist=false', json=g3t1)
     formula_tree = response.json()
     rospy.loginfo('Edited the formula tree')
     return formula_tree 

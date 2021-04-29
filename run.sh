@@ -24,7 +24,7 @@ gnome-terminal --working-directory=${bsn}/configurations/knowledge_repository -e
 gnome-terminal --working-directory=${bsn}/configurations/knowledge_repository -e 'roslaunch --pid=/var/tmp/data_access.pid formula_accessor.launch' & sleep 5s
 
 ################# MANAGER SYSTEM #################
-gnome-terminal --working-directory=${bsn}/configurations/system_manager -e 'roslaunch --pid=/var/tmp/strategy_manager.pid strategy_manager.launch' & sleep 7s
+# gnome-terminal --working-directory=${bsn}/configurations/system_manager -e 'roslaunch --pid=/var/tmp/strategy_manager.pid strategy_manager.launch' & sleep 7s
 
 gnome-terminal --working-directory=${bsn}/configurations/system_manager -e 'roslaunch --pid=/var/tmp/strategy_enactor.pid strategy_enactor.launch' & sleep 1s
 
