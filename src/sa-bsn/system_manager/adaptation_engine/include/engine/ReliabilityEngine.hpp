@@ -29,6 +29,7 @@
 #include "archlib/EnergyStatus.h"
 #include "archlib/ROSComponent.hpp"
 #include "archlib/EngineRequest.h"
+#include "std_msgs/String.h"
 
 #include "engine/Engine.hpp"
 
@@ -67,6 +68,8 @@ class ReliabilityEngine : public Engine {
 		std::string prefix;
 
 		ros::Publisher enact;
+		ros::Publisher add_pub;
+		ros::Publisher remove_pub;
 };
 
 #endif 

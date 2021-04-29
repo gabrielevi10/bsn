@@ -7,6 +7,7 @@
 
 #include "ros/ros.h"
 #include <ros/package.h>
+#include "std_msgs/String.h"
 
 #include "libbsn/goalmodel/Node.hpp"
 #include "libbsn/goalmodel/Goal.hpp"
@@ -61,6 +62,7 @@ class DataAccess : public arch::ROSComponent {
 		//void updateBatteries();
 		//void updateCosts();
 		void applyTimeWindow();
+		std::string fetch_formula(std::string name);
 	public:
 		virtual void setUp();
 		virtual void tearDown();
@@ -69,6 +71,7 @@ class DataAccess : public arch::ROSComponent {
 		void receivePersistMessage(const archlib::Persist::ConstPtr& msg);
 		bool processQuery(archlib::DataAccessRequest::Request &req, archlib::DataAccessRequest::Response &res);
 		void processTargetSystemData(const messages::TargetSystemData::ConstPtr& msg);
+		void updateFormula(const std_msgs::String::ConstPtr& formula);
 
 	protected:
 		ros::NodeHandle handle;
@@ -77,6 +80,7 @@ class DataAccess : public arch::ROSComponent {
 		ros::Subscriber handle_persist;
 		ros::ServiceServer server;
 		ros::Subscriber targetSystemSub;
+		ros::Subscriber formulaSub;
 
 		std::fstream fp;
 		std::string event_filepath;
@@ -104,6 +108,7 @@ class DataAccess : public arch::ROSComponent {
 
 		std::string reliability_formula;
 		std::string cost_formula;
+		std::string formula;
 
 		double frequency;
 		int32_t count_to_calc_and_reset;

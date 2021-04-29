@@ -27,8 +27,9 @@ def update():
 def setup():
     global formula_tree
     rospy.init_node('formula_accessor', anonymous=True)
-    formula_tree = make_get_request('reliability', 'BSN_1619648862568', 'G1')
+    formula_tree = make_get_request('reliability', 'BSN_1619661787700', 'G1')
     update()
+    pub.publish(formula_tree['formula'])
     
 
 def get_task(goal):

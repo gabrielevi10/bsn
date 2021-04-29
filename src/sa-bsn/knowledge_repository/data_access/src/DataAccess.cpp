@@ -13,9 +13,13 @@ std::chrono::high_resolution_clock::time_point DataAccess::nowInSeconds() const 
     return std::chrono::high_resolution_clock::now();
 }
 
-std::string fetch_formula(std::string name){
+std::string DataAccess::fetch_formula(std::string name) {
     std::string formula;
     std::string path = ros::package::getPath("repository");
+
+    if (name == "reliability") {
+        return reliability_formula;
+    }
 
     //std::string path = ros::package::getPath("adaptation_engine");
     std::string filename = "/../resource/models/" + name + ".formula";
@@ -102,7 +106,9 @@ void DataAccess::setUp() {
     handle_persist = handle.subscribe("persist", 1000, &DataAccess::receivePersistMessage, this);
     server = handle.advertiseService("DataAccessRequest", &DataAccess::processQuery, this);
     targetSystemSub = handle.subscribe("TargetSystemData", 100, &DataAccess::processTargetSystemData, this);
+    formulaSub = handle.subscribe("formula", 100, &DataAccess::updateFormula, this);
 }
+
 
 void DataAccess::tearDown(){}
 
@@ -113,6 +119,10 @@ void DataAccess::processTargetSystemData(const messages::TargetSystemData::Const
     components_batteries["g3t1_4"] = msg->abps_batt;
     components_batteries["g3t1_5"] = msg->abpd_batt;
     components_batteries["g3t1_6"] = msg->glc_batt;
+}
+
+void DataAccess::updateFormula(const std_msgs::String::ConstPtr& msg) {
+    reliability_formula = msg->data.c_str();
 }
 
 void DataAccess::body() {

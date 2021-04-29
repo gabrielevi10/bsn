@@ -2,6 +2,8 @@
 
 using namespace bsn::goalmodel;
 
+const std::string ID = "BSN_1619654997739";
+
 struct comp{
     template<typename T>
     bool operator()(const T& l, const T& r) const
@@ -25,6 +27,8 @@ void ReliabilityEngine::setUp() {
 	handle.getParam("gain", gain);
 
     enact = handle.advertise<archlib::Strategy>("strategy", 10);
+    remove_pub = handle.advertise<std_msgs::String>("remove_task", 1000);
+    add_pub = handle.advertise<std_msgs::String>("add_task", 1000);
 }
 
 void ReliabilityEngine::tearDown() {
@@ -152,12 +156,22 @@ void ReliabilityEngine::monitor() {
         std::vector<std::string> values = bsn::utils::split(second, ',');
         for (std::string value : values) {
             if (first != "G4_T1") {
-                strategy["CTX_" + first] = 1;
+                // strategy["CTX_" + first] = 1;
                 
+                std_msgs::String msg;
+                std::stringstream ss;
+                ss << "reliability;" + ID + ";" + first;
+                msg.data = ss.str();
                 if (value == "deactivate") {
-                    strategy["R_" + first] = 1;
-                    deactivatedComponents["R_" + first] = 1;
-                    std::cout << first + " was deactivated and its reliability was set to 1" << std::endl;
+                    // strategy["R_" + first] = 1;
+                    remove_pub.publish(msg);
+                    // deactivatedComponents["R_" + first] = 1;
+                    force_update();
+                    std::cout << first + " was deactivated" << std::endl;
+                } else {
+                    add_pub.publish(msg);
+                    force_update();
+                    std::cout << first + " was activated" << std::endl;
                 }
             } else {
                 if (value == "activate") {
@@ -222,7 +236,7 @@ void ReliabilityEngine::plan() {
                 }
             }
         }
-    }  
+    }
 
     //reorder r_vec based on priority
     std::vector<std::string> aux = r_vec;

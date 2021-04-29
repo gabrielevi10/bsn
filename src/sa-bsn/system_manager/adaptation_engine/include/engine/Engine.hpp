@@ -41,6 +41,9 @@ class Engine : public arch::ROSComponent {
       	Engine(const Engine &);
     	Engine &operator=(const Engine &);
 
+	protected:	
+		void force_update();
+
   	public:
         virtual void setUp();
     	virtual void tearDown();

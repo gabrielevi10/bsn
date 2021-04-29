@@ -118,6 +118,12 @@ double Engine::calculate_qos(bsn::model::Formula model, std::map<std::string, do
     return false;
 }*/
 
+void Engine::force_update() {
+    std::string formula_str = fetch_formula(qos_attribute);
+    if (formula_str == "") return;
+    setUp_formula(formula_str);
+}
+
 void Engine::body(){
     ros::NodeHandle n;
     ros::Subscriber t_sub = n.subscribe("exception", 1000, &Engine::receiveException, this);
@@ -128,9 +134,7 @@ void Engine::body(){
         update++;
         if (update >= rosComponentDescriptor.getFreq()*10){
             update = 0;
-            std::string formula_str = fetch_formula(qos_attribute);
-            if(formula_str=="") continue;
-            setUp_formula(formula_str);
+            force_update();
         }
 
         monitor();
