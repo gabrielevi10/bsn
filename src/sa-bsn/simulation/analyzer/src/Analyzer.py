@@ -306,10 +306,12 @@ class Analyzer:
                     formula.compute('CTX_'+ctx.getName(), ctx.isActive(), self.formula_id)
 
 
-            if(reg[0]=="Event" or reg[0]=="Status"):
+            if(reg[0]=="Status"):
                 #global_status_timeseries[instant] = b_formula.eval()
                 if self.formula_id == "reliability":
-                    global_reli_timeseries[instant] = formula.eval()       
+                    #EH AQUI QUE EU MEXO MANO
+                    print(reg)
+                    global_reli_timeseries[instant] = float(reg[6])
 
         input_timeseries = dict()
         noise_factor = dict()
