@@ -21,10 +21,10 @@ gnome-terminal -x roscore & sleep 5s
 
 ################# KNOWLEDGE REPOSITORY #################
 gnome-terminal --working-directory=${bsn}/configurations/knowledge_repository -e 'roslaunch --pid=/var/tmp/data_access.pid data_access.launch' & sleep 10s
-gnome-terminal --working-directory=${bsn}/configurations/knowledge_repository -e 'roslaunch --pid=/var/tmp/data_access.pid formula_accessor.launch' & sleep 5s
+gnome-terminal --working-directory=${bsn}/configurations/knowledge_repository -e 'roslaunch --pid=/var/tmp/formula_accessor.pid formula_accessor.launch' & sleep 5s
 
 ################# MANAGER SYSTEM #################
-# gnome-terminal --working-directory=${bsn}/configurations/system_manager -e 'roslaunch --pid=/var/tmp/strategy_manager.pid strategy_manager.launch' & sleep 7s
+gnome-terminal --working-directory=${bsn}/configurations/system_manager -e 'roslaunch --pid=/var/tmp/strategy_manager.pid strategy_manager.launch' & sleep 7s
 
 gnome-terminal --working-directory=${bsn}/configurations/system_manager -e 'roslaunch --pid=/var/tmp/strategy_enactor.pid strategy_enactor.launch' & sleep 1s
 
@@ -49,6 +49,7 @@ gnome-terminal --working-directory=${bsn}/configurations/target_system -e 'rosla
 gnome-terminal --working-directory=${bsn}/configurations/simulation -e 'roslaunch --pid=/var/tmp/injector.pid injector.launch' & sleep ${exec_time}s
 
 kill $(cat /var/tmp/data_access.pid && rm /var/tmp/data_access.pid) & sleep 1s
+kill $(cat /var/tmp/formula_accessor.pid && rm /var/tmp/formula_accessor.pid) & sleep 1s
 kill $(cat /var/tmp/strategy_enactor.pid && rm /var/tmp/strategy_enactor.pid) & sleep 1s
 kill $(cat /var/tmp/logger.pid && rm /var/tmp/logger.pid) & sleep 1s
 kill $(cat /var/tmp/probe.pid && rm /var/tmp/probe.pid) & sleep 1s

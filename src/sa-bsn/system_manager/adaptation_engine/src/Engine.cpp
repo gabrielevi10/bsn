@@ -129,6 +129,7 @@ double Engine::calculate_qos(bsn::model::Formula model, std::map<std::string, do
 
 void Engine::force_update() {
     std::string formula_str = fetch_formula(qos_attribute);
+    std::cout << "FORMULA: " << formula_str << '\n';
     if (formula_str == "") return;
     setUp_formula(formula_str);
 }

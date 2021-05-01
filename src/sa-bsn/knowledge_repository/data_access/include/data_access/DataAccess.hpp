@@ -8,6 +8,7 @@
 #include "ros/ros.h"
 #include <ros/package.h>
 #include "std_msgs/String.h"
+#include "std_msgs/Float64.h"
 
 #include "libbsn/goalmodel/Node.hpp"
 #include "libbsn/goalmodel/Goal.hpp"
@@ -50,12 +51,12 @@ class DataAccess : public arch::ROSComponent {
 		void persistEnergyStatus(const int64_t &timestamp, const std::string &source, const std::string &target, const std::string &content);
 		void persistUncertainty(const int64_t &timestamp, const std::string &source, const std::string &target, const std::string &content);
 		void persistAdaptation(const int64_t &timestamp, const std::string &source, const std::string &target, const std::string &content);
-
 		void flush();
 
 		//double calculateCost();
 		double calculateReliability();
 
+		void updateReli(const std_msgs::Float64::ConstPtr& msg);
 		std::string calculateComponentReliability(const std::string& component);
 		std::string calculateComponentCost(const std::string& component, std::string req_name);
 		void resetStatus();
@@ -81,6 +82,7 @@ class DataAccess : public arch::ROSComponent {
 		ros::ServiceServer server;
 		ros::Subscriber targetSystemSub;
 		ros::Subscriber formulaSub;
+		ros::Subscriber reliSub;
 
 		std::fstream fp;
 		std::string event_filepath;
@@ -114,6 +116,7 @@ class DataAccess : public arch::ROSComponent {
 		int32_t count_to_calc_and_reset;
 		int32_t count_to_fetch;
 		int32_t arrived_status;
+		double global_reliability = 0;
 };
 
 #endif 

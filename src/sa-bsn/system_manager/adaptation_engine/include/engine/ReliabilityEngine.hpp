@@ -30,6 +30,7 @@
 #include "archlib/ROSComponent.hpp"
 #include "archlib/EngineRequest.h"
 #include "std_msgs/String.h"
+#include "std_msgs/Float64.h"
 
 #include "engine/Engine.hpp"
 
@@ -70,6 +71,8 @@ class ReliabilityEngine : public Engine {
 		ros::Publisher enact;
 		ros::Publisher add_pub;
 		ros::Publisher remove_pub;
+		ros::Publisher formula_pub;
+
 };
 
 #endif 

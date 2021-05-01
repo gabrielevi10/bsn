@@ -1,5 +1,5 @@
 #include "data_access/DataAccess.hpp"
-
+#include <bits/stdc++.h>
 #define W(x) std::cerr << #x << " = " << x << std::endl;
 
 DataAccess::DataAccess(int  &argc, char **argv, const std::string &name) : ROSComponent(argc, argv, name), fp(), event_filepath(), status_filepath(), logical_clock(0), statusVec(), eventVec(), status(), buffer_size(), reliability_formula(), cost_formula() {}
@@ -107,6 +107,7 @@ void DataAccess::setUp() {
     server = handle.advertiseService("DataAccessRequest", &DataAccess::processQuery, this);
     targetSystemSub = handle.subscribe("TargetSystemData", 100, &DataAccess::processTargetSystemData, this);
     formulaSub = handle.subscribe("formula", 100, &DataAccess::updateFormula, this);
+    reliSub = handle.subscribe("reliability", 1000, &DataAccess::updateReli, this);
 }
 
 
@@ -123,6 +124,15 @@ void DataAccess::processTargetSystemData(const messages::TargetSystemData::Const
 
 void DataAccess::updateFormula(const std_msgs::String::ConstPtr& msg) {
     reliability_formula = msg->data.c_str();
+    std::cout << reliability_formula << std::endl;
+    std::string::iterator end_pos = std::remove(reliability_formula.begin(), reliability_formula.end(), ' ');
+    reliability_formula.erase(end_pos, reliability_formula.end());
+    std::cout << reliability_formula << std::endl;
+}
+
+void DataAccess::updateReli(const std_msgs::Float64::ConstPtr& msg) {
+    global_reliability = msg->data;
+    std::cout << "RECEIVED RELIABILITY: " << global_reliability << std::endl;
 }
 
 void DataAccess::body() {
@@ -280,7 +290,7 @@ void DataAccess::persistEvent(const int64_t &timestamp, const std::string &sourc
 }
 
 void DataAccess::persistStatus(const int64_t &timestamp, const std::string &source, const std::string &target, const std::string &content){
-    StatusMessage obj("Status", timestamp, logical_clock, source, target, content);
+    StatusMessage obj("Status", timestamp, logical_clock, source, target, content, this->global_reliability);
     statusVec.push_back(obj);   
 
     if (logical_clock % 30 == 0) flush();
@@ -315,7 +325,8 @@ void DataAccess::flush(){
         fp << (*it).getTimestamp() << ",";
         fp << (*it).getSource() << ",";
         fp << (*it).getTarget() << ",";
-        fp << (*it).getState() << "\n";
+        fp << (*it).getState() << "," ;
+        fp << (*it).getReli() << "\n";
     }
     fp.close();
     statusVec.clear();

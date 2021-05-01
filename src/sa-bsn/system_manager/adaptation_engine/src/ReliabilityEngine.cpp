@@ -29,6 +29,7 @@ void ReliabilityEngine::setUp() {
     enact = handle.advertise<archlib::Strategy>("strategy", 10);
     remove_pub = handle.advertise<std_msgs::String>("remove_task", 1000);
     add_pub = handle.advertise<std_msgs::String>("add_task", 1000);
+    formula_pub = handle.advertise<std_msgs::Float64>("reliability", 1000);
 }
 
 void ReliabilityEngine::tearDown() {
@@ -158,7 +159,7 @@ void ReliabilityEngine::monitor() {
         std::vector<std::string> values = bsn::utils::split(second, ',');
         for (std::string value : values) {
             if (first != "G4_T1") {
-                // strategy["CTX_" + first] = 1;
+                strategy["CTX_" + first] = 1;
                 
                 std_msgs::String msg;
                 std::stringstream ss;
@@ -168,6 +169,7 @@ void ReliabilityEngine::monitor() {
                     // strategy["R_" + first] = 1;
                     remove_pub.publish(msg);
                     deactivatedComponents[first] = 1;
+                    
                     force_update();
                     std::cout << first + " was deactivated" << std::endl;
                 } else if (value == "activate" && deactivatedComponents[first] == 1) {
@@ -203,9 +205,19 @@ void ReliabilityEngine::analyze() {
     double error;
 
     r_curr = calculate_qos(target_system_model, strategy);
+    std_msgs::Float64 msg;
+    msg.data = r_curr;
+    formula_pub.publish(msg);
+    std::cout << "reliability: " << r_curr << std::endl;
+
+    for (auto x : strategy) {
+        std::cout << x.first << " " << x.second << " ";
+    }
+    std::cout << std::endl;
 
     error = setpoint - r_curr;
-    // if the error is out of the stability margin, plan!
+    std::cout << "error: " << error << '\n';
+    // if the error is out of the stab_curr ility margin, plan!
     if ((error > setpoint * tolerance) || (error < -tolerance * setpoint)) {
         if (cycles >= monitor_freq / actuation_freq) {
             cycles = 0;
@@ -219,7 +231,7 @@ void ReliabilityEngine::plan() {
     std::cout << "[reli plan]" << std::endl;
 
     std::cout << "setpoint= " << setpoint << std::endl;
-    double r_curr = calculate_qos(target_system_model,strategy);
+    double r_curr = calculate_qos(target_system_model, strategy);
     std::cout << "r_curr= " << r_curr << std::endl;
     double error = setpoint - r_curr;
     std::cout << "error= " << error << std::endl;
